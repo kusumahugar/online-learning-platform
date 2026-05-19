@@ -1,3 +1,8 @@
 node_modules
 dist
 .env
+<<<<<<< HEAD
+=======
+.DS_Store
+npm-debug.log*
+>>>>>>> 09a2b2447600b9584ca63bbdd32f8434a290c22b

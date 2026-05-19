@@ -1,9 +1,14 @@
 version: '3.9'
+<<<<<<< HEAD
+=======
+
+>>>>>>> 09a2b2447600b9584ca63bbdd32f8434a290c22b
 services:
   mongo:
     image: mongo:6.0
     container_name: online-learning-mongo
     restart: unless-stopped
+<<<<<<< HEAD
     ports:
       - "27017:27017"
     volumes:
@@ -21,10 +26,36 @@ services:
       PORT: 5000
       MONGO_URI: mongodb://mongo:27017/online-learning-platform
       JWT_SECRET: supersecretkey
+=======
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: online-learning-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://root:example@mongo:27017/online-learning-platform?authSource=admin
+    ports:
+      - '5000:5000'
+    depends_on:
+      - mongo
+>>>>>>> 09a2b2447600b9584ca63bbdd32f8434a290c22b
 
   frontend:
     build:
       context: ./frontend
+<<<<<<< HEAD
       args:
         VITE_API_URL: http://backend:5000
     container_name: online-learning-frontend
@@ -37,3 +68,17 @@ services:
 
 volumes:
   mongo-data:
+=======
+      dockerfile: Dockerfile
+    container_name: online-learning-frontend
+    restart: unless-stopped
+    environment:
+      - VITE_API_BASE_URL=http://backend:5000
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
+>>>>>>> 09a2b2447600b9584ca63bbdd32f8434a290c22b

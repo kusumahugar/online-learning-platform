@@ -3,13 +3,21 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+<<<<<<< HEAD
 
 const getStoredUser = () => {
   const stored = localStorage.getItem('olp_user');
+=======
+import Navbar from './components/Navbar';
+
+const getUserFromStorage = () => {
+  const stored = localStorage.getItem('learnPlatformUser');
+>>>>>>> 09a2b2447600b9584ca63bbdd32f8434a290c22b
   return stored ? JSON.parse(stored) : null;
 };
 
 function App() {
+<<<<<<< HEAD
   const [user, setUser] = useState(getStoredUser());
   const navigate = useNavigate();
 
@@ -31,10 +39,28 @@ function App() {
     localStorage.setItem('olp_user', JSON.stringify(authData));
     setUser(authData);
     navigate('/dashboard');
+=======
+  const [user, setUser] = useState(getUserFromStorage());
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.setItem('learnPlatformUser', JSON.stringify(user));
+  }, [user]);
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('learnPlatformUser');
+    navigate('/login');
+  };
+
+  const protectRoute = (element) => {
+    return user ? element : <Navigate to="/login" replace />;
+>>>>>>> 09a2b2447600b9584ca63bbdd32f8434a290c22b
   };
 
   return (
     <div className="app-shell">
+<<<<<<< HEAD
       <header className="app-header">
         <div className="brand">Online Learning Platform</div>
         {user ? (
@@ -59,6 +85,19 @@ function App() {
             path="/dashboard"
             element={user ? <Dashboard user={user} /> : <Navigate to="/login" replace />}
           />
+=======
+      <Navbar user={user} onLogout={handleLogout} />
+      <main className="content">
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/login" element={<Login onSignIn={setUser} />} />
+          <Route path="/register" element={<Register onSignUp={setUser} />} />
+          <Route
+            path="/dashboard"
+            element={protectRoute(<Dashboard user={user} />)}
+          />
+          <Route path="*" element={<Navigate to="/dashboard" />} />
+>>>>>>> 09a2b2447600b9584ca63bbdd32f8434a290c22b
         </Routes>
       </main>
     </div>
