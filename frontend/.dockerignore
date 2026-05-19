@@ -1,14 +1,7 @@
 node_modules
-dist
-<<<<<<< HEAD
-npm-debug.log
-.DS_Store
-.env
-=======
+/dist
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .DS_Store
 .env
-.git
->>>>>>> 09a2b2447600b9584ca63bbdd32f8434a290c22b

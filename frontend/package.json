@@ -1,12 +1,7 @@
 {
   "name": "online-learning-platform-frontend",
-<<<<<<< HEAD
   "version": "1.0.0",
   "private": true,
-=======
-  "private": true,
-  "version": "0.0.1",
->>>>>>> 09a2b2447600b9584ca63bbdd32f8434a290c22b
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,24 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "axios": "^1.4.0",
+    "axios": "^1.6.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.18.0"
+    "react-router-dom": "^6.18.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
     "vite": "^5.4.0"
-=======
-    "axios": "^1.7.6",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.16.0"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^6.0.2",
-    "vite": "^8.0.13"
->>>>>>> 09a2b2447600b9584ca63bbdd32f8434a290c22b
   }
 }
