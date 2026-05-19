@@ -1,105 +1,54 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
-    DOCKERHUB_ORG = 'your-dockerhub-username'
-    BACKEND_IMAGE = "${DOCKERHUB_ORG}/online-learning-backend:latest"
-    FRONTEND_IMAGE = "${DOCKERHUB_ORG}/online-learning-frontend:latest"
-    SONARQUBE_ENABLED = 'false'
-  }
-
-  options {
-    ansiColor('xterm')
-    timestamps()
-    skipDefaultCheckout()
-  }
-
-  stages {
-    stage('Git Checkout') {
-      steps {
-        checkout scm
-      }
+    environment {
+        PROJECT_NAME = "online-learning-platform"
     }
 
-    stage('Install Dependencies') {
-      steps {
-        dir('backend') {
-          sh 'npm install'
-        }
-        dir('frontend') {
-          sh 'npm install'
-        }
-      }
-    }
+    stages {
 
-    stage('Run Tests') {
-      steps {
-        script {
-          dir('backend') {
-            def backendStatus = sh(script: 'npm run test || true', returnStatus: true)
-            if (backendStatus != 0) {
-              echo 'Backend tests did not run or failed. Continuing because no tests are configured.'
+        stage('Checkout Code') {
+            steps {
+                checkout scm
             }
-          }
-          dir('frontend') {
-            def frontendStatus = sh(script: 'npm run test || true', returnStatus: true)
-            if (frontendStatus != 0) {
-              echo 'Frontend tests did not run or failed. Continuing because no tests are configured.'
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                bat 'docker-compose build --no-cache'
             }
-          }
         }
-      }
-    }
 
-    stage('SonarQube Analysis') {
-      when {
-        expression { env.SONARQUBE_ENABLED == 'true' }
-      }
-      steps {
-        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-          sh 'sonar-scanner -Dsonar.projectKey=online-learning-platform -Dsonar.sources=. -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_TOKEN}'
+        stage('Run Containers') {
+            steps {
+                bat 'docker-compose up -d'
+            }
         }
-      }
-    }
 
-    stage('Build Docker Images') {
-      steps {
-        script {
-          dir('backend') {
-            sh "docker build -t ${BACKEND_IMAGE} ."
-          }
-          dir('frontend') {
-            sh "docker build --build-arg VITE_API_URL=http://backend:5000/api -t ${FRONTEND_IMAGE} ."
-          }
+        stage('Check Running Containers') {
+            steps {
+                bat 'docker ps'
+            }
         }
-      }
-    }
 
-    stage('Push Images to DockerHub') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: env.DOCKERHUB_CREDENTIALS, usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-          sh 'echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin'
-          sh "docker push ${BACKEND_IMAGE}"
-          sh "docker push ${FRONTEND_IMAGE}"
+        stage('Success Message') {
+            steps {
+                echo "======================================"
+                echo "✅ BUILD SUCCESS"
+                echo "Frontend: http://localhost:3000"
+                echo "Backend: http://localhost:5000"
+                echo "MongoDB running on 27017"
+                echo "======================================"
+            }
         }
-      }
     }
 
-    stage('Deploy using Docker Compose') {
-      steps {
-        sh 'docker compose down || true'
-        sh 'docker compose up -d --build'
-      }
+    post {
+        success {
+            echo "PIPELINE FINISHED SUCCESSFULLY 🎉"
+        }
+        failure {
+            echo "PIPELINE FAILED ❌"
+        }
     }
-  }
-
-  post {
-    success {
-      echo 'Build Successful'
-    }
-    failure {
-      echo 'Build failed'
-    }
-  }
 }
