@@ -1,54 +1,60 @@
 pipeline {
-    agent any
+  agent any
 
-    environment {
-        PROJECT_NAME = "online-learning-platform"
+  environment {
+    DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
+    DOCKERHUB_ORG = 'your-dockerhub-username'
+    BACKEND_IMAGE = "${DOCKERHUB_ORG}/online-learning-backend:latest"
+    FRONTEND_IMAGE = "${DOCKERHUB_ORG}/online-learning-frontend:latest"
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
     }
 
-    stages {
-
-        stage('Checkout Code') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Build Docker Images') {
-            steps {
-                bat 'docker-compose build --no-cache'
-            }
-        }
-
-        stage('Run Containers') {
-            steps {
-                bat 'docker-compose up -d'
-            }
-        }
-
-        stage('Check Running Containers') {
-            steps {
-                bat 'docker ps'
-            }
-        }
-
-        stage('Success Message') {
-            steps {
-                echo "======================================"
-                echo "✅ BUILD SUCCESS"
-                echo "Frontend: http://localhost:3000"
-                echo "Backend: http://localhost:5000"
-                echo "MongoDB running on 27017"
-                echo "======================================"
-            }
-        }
+    stage('Install Dependencies') {
+      steps {
+        sh 'cd backend && npm install'
+        sh 'cd frontend && npm install'
+      }
     }
 
-    post {
-        success {
-            echo "PIPELINE FINISHED SUCCESSFULLY 🎉"
-        }
-        failure {
-            echo "PIPELINE FAILED ❌"
-        }
+    stage('Build Backend') {
+      steps {
+        sh 'cd backend && docker build -t $BACKEND_IMAGE .'
+      }
     }
+
+    stage('Build Frontend') {
+      steps {
+        sh 'cd frontend && docker build -t $FRONTEND_IMAGE .'
+      }
+    }
+
+    stage('Run Containers') {
+      steps {
+        sh 'docker compose down || true'
+        sh 'docker compose up -d --build'
+      }
+    }
+
+    stage('Check Running Containers') {
+      steps {
+        sh 'docker ps'
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "PIPELINE SUCCESS ✅ APP RUNNING"
+    }
+    failure {
+      echo "PIPELINE FAILED ❌"
+    }
+  }
 }
