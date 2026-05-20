@@ -1,0 +1,12 @@
+FROM jenkins/jenkins:lts
+
+USER root
+
+RUN apt update && apt install -y curl docker.io
+
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+ && apt install -y nodejs
+
+RUN usermod -aG docker jenkins
+
+USER jenkins
